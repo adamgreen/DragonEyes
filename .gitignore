@@ -1,0 +1,11 @@
+# Files to be ignored by Git
+.DS_Store
+
+# Build output for GCC4MBED based builds.
+LPC1768/
+
+# Log files.
+mri.log
+
+# VSCode projects
+.vscode/
