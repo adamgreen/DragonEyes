@@ -222,7 +222,7 @@ static void frame( // Process motion for a single frame of left or right eye
   if(eyeInMotion) {                       // Currently moving?
     if(dt >= eyeMoveDuration) {           // Time up?  Destination reached.
       eyeInMotion      = false;           // Stop moving
-      eyeMoveDuration  = rand()%3000000; // UNDONE: random(3000000); // 0-3 sec stop
+      eyeMoveDuration  = rand()%3000000;  // 0-3 sec stop
       eyeMoveStartTime = t;               // Save initial time of stop
       eyeX = eyeOldX = eyeNewX;           // Save position
       eyeY = eyeOldY = eyeNewY;
@@ -238,12 +238,12 @@ static void frame( // Process motion for a single frame of left or right eye
       int16_t  dx, dy;
       uint32_t d;
       do {                                // Pick new dest in circle
-        eyeNewX = rand() % 1024; // UNDONE: random(1024);
-        eyeNewY = rand() % 1024; // UNDONE: random(1024);
+        eyeNewX = rand() % 1024;
+        eyeNewY = rand() % 1024;
         dx      = (eyeNewX * 2) - 1023;
         dy      = (eyeNewY * 2) - 1023;
       } while((d = (dx * dx + dy * dy)) > (1023 * 1023)); // Keep trying
-      eyeMoveDuration  = rand()%(144000-72000)+72000; // UNDONE: random(72000, 144000); // ~1/14 - ~1/7 sec
+      eyeMoveDuration  = rand()%(144000-72000)+72000; // ~1/14 - ~1/7 sec
       eyeMoveStartTime = t;               // Save initial time of move
       eyeInMotion      = true;            // Start move on next frame
     }
@@ -255,7 +255,7 @@ static void frame( // Process motion for a single frame of left or right eye
   // and durations are random (within ranges).
   if((t - timeOfLastBlink) >= timeToNextBlink) { // Start new blink?
     timeOfLastBlink = t;
-    uint32_t blinkDuration = rand()%(72000-36000)+36000; // UNDONE: random(36000, 72000); // ~1/28 - ~1/14 sec
+    uint32_t blinkDuration = rand()%(72000-36000)+36000; // ~1/28 - ~1/14 sec
     // Set up durations for both eyes (if not already winking)
     for(uint8_t e=0; e<NUM_EYES; e++) {
       if(g_eye[e].blink.state == NOBLINK) {
@@ -264,7 +264,7 @@ static void frame( // Process motion for a single frame of left or right eye
         g_eye[e].blink.duration  = blinkDuration;
       }
     }
-    timeToNextBlink = blinkDuration * 3 + rand()%4000000; // UNDONE: random(4000000);
+    timeToNextBlink = blinkDuration * 3 + rand()%4000000;
   }
 #endif
 
@@ -283,6 +283,17 @@ static void frame( // Process motion for a single frame of left or right eye
 
   // Process motion, blinking and iris scale into renderable values
 
+  if (eyeIndex == 1) {
+    // UNDONE: Specific to my pumpkin mounting.
+    // The eyes are mounted a bit askew in my pumpkin so correct them here.
+    eyeX -= 128;
+    eyeY += 224;
+    if (eyeX > 1023) eyeX = 1023;
+    if (eyeX < 0) eyeX = 0;
+    if (eyeY > 1023) eyeY = 1023;
+    if (eyeY < 0) eyeY = 0;
+  }
+
   // Scale eye X/Y positions (0-1023) to pixel units used by drawEye()
   eyeX = map(eyeX, 0, 1023, 0, SCLERA_WIDTH  - 128);
   eyeY = map(eyeY, 0, 1023, 0, SCLERA_HEIGHT - 128);
@@ -292,7 +303,7 @@ static void frame( // Process motion for a single frame of left or right eye
   // to appear fixated (converged) at a conversational distance.  Number
   // here was extracted from my posterior and not mathematically based.
   // I suppose one could get all clever with a range sensor, but for now...
-  if(NUM_EYES > 1) eyeX += 4;
+  // UNDONE: if(NUM_EYES > 1) eyeX += 4;
   if(eyeX > (SCLERA_WIDTH - 128)) eyeX = (SCLERA_WIDTH - 128);
 
   // Eyelids are rendered using a brightness threshold image.  This same
@@ -353,7 +364,7 @@ void split( // Subdivides motion path into two sub-paths w/randimization
   if(range >= 8) {     // Limit subdvision count, because recursion
     range    /= 2;     // Split range & time in half for subdivision,
     duration /= 2;     // then pick random center point within range:
-    int16_t  midValue = (startValue + endValue - range) / 2 + rand() % range; // UNDONE: random(range);
+    int16_t  midValue = (startValue + endValue - range) / 2 + rand() % range;
     uint32_t midTime  = startTime + duration;
     split(startValue, midValue, startTime, duration, range); // First half
     split(midValue  , endValue, midTime  , duration, range); // Second half
@@ -398,7 +409,7 @@ void loop() {
 
 #else  // Autonomous iris scaling -- invoke recursive function
 
-  newIris = rand()%(IRIS_MAX-IRIS_MIN)+IRIS_MIN; // UNDONE: random(IRIS_MIN, IRIS_MAX);
+  newIris = rand()%(IRIS_MAX-IRIS_MIN)+IRIS_MIN;
   split(oldIris, newIris, g_timer.read_us(), 10000000L, IRIS_MAX - IRIS_MIN);
   oldIris = newIris;
 
